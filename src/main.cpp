@@ -7,8 +7,7 @@ using namespace std;
 
 int main(void) {
 
-	LongNumber x = LongNumber(3.1415);
-	// LongNumber x = LongNumber("-0.00314150000");
+	LongNumber x = 3.1415_ln;
 
 	cout << "sign:" << x.get_sign() << endl;
 	cout << "exponent:" << x.get_exponent() << endl;
@@ -17,7 +16,6 @@ int main(void) {
 	for (int i = 0; i < (int)x.get_digits().size(); i++) {
 		cout << x.get_digits()[i];
 	}
-
 
 	return 0;
 }

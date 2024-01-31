@@ -1,10 +1,10 @@
 CC = g++
 
-CFLAGS = \
-	-Wall \
-	-Werror \
-	-Wextra \
-	-std=c++17
+CFLAGS = 					\
+	-Wall 					\
+	-Werror 				\
+	-Wextra 				\
+	-std=c++17				\
 
 
 #--------

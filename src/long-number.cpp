@@ -4,6 +4,9 @@ using namespace std;
 #include "long-number.hpp"
 #include "utils.hpp"
 
+// // // // // // //
+//  Constructors  //
+// // // // // // //
 
 // Construct 0.0
 LongNumber::LongNumber() {
@@ -67,7 +70,7 @@ LongNumber::LongNumber(const string& literal) {
 			if (count_points == 0) exponent++; 
 		}
 		else {
-			// every insignificant digit before point decreases the exponent
+			// every insignificant digit after point decreases the exponent
 			if (count_points > 0) exponent--;
 		}
 		index++;
@@ -84,4 +87,18 @@ LongNumber::LongNumber(const string& literal) {
 
 // Construct LongNumber from floating literal
 // Delegate constructor (works for C++11 and >)
-LongNumber::LongNumber(double number) : LongNumber(std::to_string(number) {}
+LongNumber::LongNumber(long double number) : LongNumber(std::to_string(number)) {}
+
+// // // // // //
+//  Operators  //
+// // // // // //
+
+// Return true if number != 0
+LongNumber::operator bool() const {
+	return (exponent != 1) || (digits[0] != 0);
+}
+
+LongNumber operator""_ln(long double number) { 
+	return LongNumber(number);
+}
+
