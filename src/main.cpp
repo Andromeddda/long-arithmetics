@@ -6,11 +6,14 @@ using namespace std;
 #include "utils.hpp"
 
 int main(void) {
-	LongNumber x = 3.1415_ln;
-	LongNumber y = 2000.0000007_ln;
+	LongNumber x = 123400.0_ln;
+	LongNumber y = 0.005678_ln;
 	
-	LongNumber z = x + y;
-	long_print(z);
+	long_print(x);
+	long_print(y);
+	LongNumber w = x - y;
+
+	long_print(w);
 
 	return 0;
 }

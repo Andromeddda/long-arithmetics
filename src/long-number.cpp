@@ -25,10 +25,10 @@ void long_print(LongNumber& x) {
 		for (int i = 0; i > exp; i--) {
 			std::cout << 0;
 		}
-		for (int i = -exp; i < size; i++) std::cout << x.get_digits()[i];
+		for (int i = 0; i < size; i++) std::cout << x.get_digits()[i];
 	}
+	std::cout << std::endl;
 }
-
 
 // // // // // // //
 //  Constructors  //
@@ -120,9 +120,9 @@ LongNumber operator""_ln(long double number) {
 	return LongNumber(number);
 }
 
-// // // // // //
-//  Operators  //
-// // // // // //
+// // // // // // // //
+//  Logic Operators  //
+// // // // // // // //
 
 // Return true if number != 0
 LongNumber::operator bool() const {
@@ -138,24 +138,78 @@ LongNumber LongNumber::operator- () {
     return result;
 }
 
+// Comparison operators
+
+bool LongNumber::operator== (const LongNumber& other) {
+	return (sign == other.sign) && (exponent == other.exponent) && (digits == other.digits);
+}
+
+bool LongNumber::operator> (const LongNumber& other) {
+	// In case of different signs
+	if (sign != other.sign) return sign > other.sign;
+	// In case of different exponents
+	if (exponent != other.exponent) return (exponent > other.exponent) ^ (sign == -1);
+
+	// Exponents and signs are equal
+
+	// Copy vectors
+	vector<int> d1 = vector<int>(digits);
+	vector<int> d2 = vector<int>(other.digits);
+
+	// Push zeros to balance sizes
+	size_t size = MAX(d1.size(), d2.size());
+	if (d1.size() < size)
+		d1.insert(d1.end(), size - d1.size(), 0);
+	if (d2.size() < size)
+		d2.insert(d2.end(), size - d2.size(), 0);
+
+	// Run through vectors and compare
+	for (unsigned int i = 0; i < size; i++) {
+		if (d1[i] != d2[i]) {
+			return (d1[i] > d2[i]) ^ (sign == -1);
+		}
+	}
+	return false;
+}
+
+bool LongNumber::operator>= (const LongNumber& other) {
+	return (*this == other) || (*this > other);
+}
+
+bool LongNumber::operator< (const LongNumber& other) {
+	return !(*this >= other);
+}
+
+bool LongNumber::operator<= (const LongNumber& other) {
+	return !(*this > other);
+}
+
+// // // // // // // //
+// Numeric Operators //
+// // // // // // // //
+
 LongNumber LongNumber::operator+ (const LongNumber& other) {
+	// SPECIAL CASES
+	// Case: x + (-x) to return correct 0.0 with sign == 1
+	if (*this == (LongNumber)(-other)) return LongNumber();
+
     // Case: number + 0.0
     if(!(*this)) return LongNumber(other);
     if(!other) return LongNumber(*this);
     
-    // Case: different signs
+    // Case: different signs (call operator-)
     if (sign != other.sign) {
         if (sign == -1) {
-            // Case: negative + positive (call operator-)
+            // negative + positive 
             return other - (-(*this));
         }
         else {
-            // Case: positive + negative (call operator-)
-            return *this - (-other);
+            // positive + negative
+            return *this - (LongNumber)(-other);
         }
     }
     
-    // Case: similar signs
+    // MAIN CASE
 
     // If we have numbers like 1234e6 and 5678e-3
     // We should bring them into form 123400.0000000 and 000000.0005678
@@ -172,12 +226,12 @@ LongNumber LongNumber::operator+ (const LongNumber& other) {
     // Insert zeros in the front 
     //		(with previous example we'll had [1,2,3,4] and [0, ... ,0,5,6,7,8]
     if (ex1 < res_ex) {
-    	d1.insert(d1.begin(), (size_t)(res_ex - ex1), 0);
+		d1.insert(d1.begin(), (size_t)(res_ex - ex1), 0);
     	ex1 = res_ex;
     }
     if (ex2 < res_ex) {
-    	d2.insert(d2.begin(), (size_t)(res_ex - ex2), 0);
-    	ex2 = res_ex;
+		d2.insert(d2.begin(), (size_t)(res_ex - ex2), 0);
+		ex2 = res_ex;
     }
 
     // Find new size to insert zeros in the back
@@ -213,8 +267,88 @@ LongNumber LongNumber::operator+ (const LongNumber& other) {
 
     // Remove zeros from the back
 	int index = result.digits.size() - 1;
-	while(digits[index] == 0) {
-		digits.pop_back();
+	while(result.digits[index] == 0) {
+		result.digits.pop_back();
+		index--;
+	}
+
+	return result;
+}
+
+LongNumber LongNumber::operator- (const LongNumber& other) {
+	// SPECIAL CASES
+	// Case: x - x to return correct 0.0 with sign == 1
+	if (*this == other) return LongNumber();
+
+	// Case: different signs (call operator+)
+	if (sign != other.sign) return *this + (LongNumber)(-other);
+
+	// Case: both negative 
+	if ((sign == -1) && (other.sign == -1)) return (-other) - (-(*this));
+
+	// MAIN CASE
+	bool compare = *this > other;
+	// Exponents of biggest and smallest numbers
+	int ex1 = compare ? exponent : other.exponent;
+	int ex2 = compare ? other.exponent : exponent;
+	int res_ex = MAX(ex1, ex2);
+
+	// Digits of biggest and smallest numbers
+	vector<int> d1 = vector<int>(compare ? digits : other.digits);
+	vector<int> d2 = vector<int>(compare ? other.digits : digits);
+
+	// BALANCE ZEROS
+	// Insert zeros in the front 
+    if (ex1 < res_ex) {
+		d1.insert(d1.begin(), (size_t)(res_ex - ex1), 0);
+    	ex1 = res_ex;
+    }
+    if (ex2 < res_ex) {
+		d2.insert(d2.begin(), (size_t)(res_ex - ex2), 0);
+		ex2 = res_ex;
+    }
+
+    // Find new size to insert zeros in the back
+    size_t size = MAX(d1.size(), d2.size());
+
+    // Insert zeros in the back
+    if (d1.size() < size)
+    	d1.insert(d1.end(), size - d1.size(), 0);
+    if (d2.size() < size)
+    	d2.insert(d2.end(), size - d2.size(), 0);
+
+    // Create new number
+    LongNumber result;
+    result.sign = compare ? 1 : -1;
+    result.digits = vector<int>(size, 0);
+
+    // Run and subtract
+    int loan = 0; 
+    for (int i = size - 1; i >= 0; i--) {
+    	if (d1[i] - loan < d2[i]) {
+    		// Need to take extra 10 from next digit
+    		result.digits[i] = 10 + d1[i] - loan - d2[i];
+    		loan = 1;
+    	}
+    	else {
+    		result.digits[i] = d1[i] - loan - d2[i];
+    		loan = 0;
+    	}
+    }
+
+    // Remove first digit if it is 0
+    if (result.digits[0] == 0) {
+    	result.digits.erase(result.digits.begin());
+    	result.exponent = res_ex - 1;
+    }
+    else {
+    	result.exponent = res_ex;
+    }
+
+    // Remove zeros from the back
+	int index = result.digits.size() - 1;
+	while(result.digits[index] == 0) {
+		result.digits.pop_back();
 		index--;
 	}
 
