@@ -46,7 +46,10 @@ public:
 	// Return true if number != 0
 	operator bool() const;
 
-	LongNumber operator+(const LongNumber& other);
+	// Unary minus
+	LongNumber operator- ();
+
+	LongNumber operator+ (const LongNumber& other);
 	// LongNumber operator-(const LongNumber& left, LongNumber& right);
 	// LongNumber operator*(const LongNumber& left, LongNumber& right);
 	// LongNumber operator/(const LongNumber& left, LongNumber& right);
@@ -54,3 +57,5 @@ public:
 
 // User-defined floating-point literal
 LongNumber operator""_ln(long double number);
+
+void long_print(LongNumber& x);
