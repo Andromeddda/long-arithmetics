@@ -4,16 +4,18 @@ using namespace std;
 #include <string>
 #include "long-number.hpp"
 #include "utils.hpp"
+#include <ctime>
 
 int main(void) {
-	LongNumber x = 123400.0_ln;
-	LongNumber y = 0.005678_ln;
 	
-	long_print(x);
-	long_print(y);
-	LongNumber w = x - y;
+	int N;
+	cin >> N;
 
-	long_print(w);
+	vector<int> a = vector<int>(N, 9);
+	vector<int> b = vector<int>(N, 8);
+
+	TIMING("Naive: ", naive_multiplication, a, b)
+	TIMING("Karatsuba: ", Karatsuba, a, b)
 
 	return 0;
 }
